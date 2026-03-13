@@ -1,190 +1,191 @@
 package com.forkaton.pemob2_123140020
 
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.painterResource
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App() {
     MaterialTheme {
-        val viewModel: NewsViewModel = viewModel { NewsViewModel() }
-        NewsAppScreen(viewModel)
+        MainScreen()
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewsAppScreen(viewModel: NewsViewModel) {
-    val newsList by viewModel.newsList.collectAsState()
-    val readCount by viewModel.readCount.collectAsState()
-    val currentCategory by viewModel.currentCategory.collectAsState()
+fun MainScreen() {
+    var showContactInfo by remember { mutableStateOf(false) }
 
-    val sheetState = rememberModalBottomSheetState()
-    var showBottomSheet by remember { mutableStateOf(false) }
-    var detailContent by remember { mutableStateOf("Memuat...") }
-    var selectedNewsTitle by remember { mutableStateOf("") }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
+    ) {
+        ProfileHeader(
+            name = "Anselmus Herpin Hasugian",
+            role = "Mahasiswa Teknik Informatika - ITERA"
+        )
 
-    val categories = listOf("Semua", "Teknologi", "Olahraga", "Politik", "Hiburan")
+        Spacer(modifier = Modifier.height(24.dp))
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("News Feed", fontWeight = FontWeight.Bold) },
-                actions = {
-                    Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier.padding(end = 16.dp)
-                    ) {
-                        Text(
-                            text = "Dibaca: $readCount",
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            )
-        }
-    ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp)
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            ProfileCard(
+                bio = "Halo! Saya adalah mahasiswa Program Studi Teknik Informatika di Institut Teknologi Sumatera dengan NIM 123140020. Saya memiliki minat mendalam di bidang rekayasa perangkat lunak, khususnya pengembangan aplikasi mobile menggunakan Kotlin Multiplatform."
+            )
 
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(categories) { category ->
-                    FilterChip(
-                        selected = category == currentCategory,
-                        onClick = { viewModel.setCategory(category) },
-                        label = { Text(category) }
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(bottom = 16.dp)
+            Button(
+                onClick = { showContactInfo = !showContactInfo },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium
             ) {
-                items(newsList) { news ->
-                    NewsCard(news = news) {
-                        viewModel.markNewsAsRead()
-                        selectedNewsTitle = news.title
-                        detailContent = "Memuat detail berita secara asinkron..."
-                        showBottomSheet = true
-
-                        viewModel.getNewsDetail(news.id) { result ->
-                            detailContent = result
-                        }
-                    }
-                }
+                Text(if (showContactInfo) "Sembunyikan Kontak" else "Hubungi Saya")
             }
-        }
-    }
 
-    if (showBottomSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showBottomSheet = false },
-            sheetState = sheetState
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .padding(bottom = 32.dp)
+            // Animasi Bonus 10%
+            AnimatedVisibility(
+                visible = showContactInfo,
+                enter = slideInVertically() + fadeIn(),
+                exit = slideOutVertically() + fadeOut()
             ) {
-                Text(
-                    text = selectedNewsTitle,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = detailContent,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Button(
-                    onClick = { showBottomSheet = false },
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text("Tutup")
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    // Menggunakan ImageVector sesuai permintaan
+                    InfoItem(icon = Icons.Default.Email, text = "anselmus.123140020@student.itera.ac.id")
+                    InfoItem(icon = Icons.Default.Phone, text = "072170918455")
+                    InfoItem(icon = Icons.Default.LocationOn, text = "Way Hui, Lampung")
                 }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
-fun NewsCard(news: News, onClick: () -> Unit) {
-    // Solusi UX: Menggunakan Emoji sebagai pengganti Icon agar lebih ringan & anti error
-    val emoji = when (news.category) {
-        "Teknologi" -> "💻"
-        "Olahraga" -> "⚽"
-        "Politik" -> "⚖️"
-        "Hiburan" -> "🎬"
-        "Error" -> "⚠️"
-        else -> "📰"
-    }
-
-    Card(
+fun ProfileHeader(name: String, role: String) {
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.elevatedCardColors()
+            .height(240.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Row(
+        Box(
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxWidth()
+                .height(150.dp)
+                .align(Alignment.TopCenter)
+                .background(MaterialTheme.colorScheme.primary)
+        )
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.align(Alignment.BottomCenter)
         ) {
             Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = if (news.category == "Error") MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier
+                    .size(130.dp)
+                    .clip(CircleShape),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shadowElevation = 8.dp
             ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Text(text = emoji, style = MaterialTheme.typography.headlineSmall)
-                }
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column {
-                Text(
-                    text = news.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Kategori: ${news.category}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                Image(
+                    painter = painterResource(Res.drawable.foto_ansel),
+                    contentDescription = "Foto Profil",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
             }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = name,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = role,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.secondary,
+                fontWeight = FontWeight.Medium
+            )
         }
+    }
+}
+
+@Composable
+fun ProfileCard(bio: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Biodata Saya",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = bio,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Justify,
+                lineHeight = 22.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+// Komponen direvisi untuk menerima ImageVector dan menggunakan Icon
+@Composable
+fun InfoItem(icon: ImageVector, text: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = text,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }

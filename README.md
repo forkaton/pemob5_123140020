@@ -1,40 +1,29 @@
-This is a Kotlin Multiplatform project targeting Android, Desktop (JVM).
+# Tugas Praktikum - Pemrograman Mobile
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+**Nama:** Anselmus Herpin Hasugian  
+**NIM:** 123140020  
 
-### Build and Run Android Application
+## Screenshot Aplikasi
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+| Android | Desktop |
+|---------|---------|
+| ![Android Screenshot](placeholder_android.png) | ![Desktop Screenshot](placeholder_desktop.png) |
 
-### Build and Run Desktop (JVM) Application
+> **Catatan:** Silakan ganti file `placeholder_android.png` dan `placeholder_desktop.png` dengan screenshot asli aplikasi Anda.
 
-To build and run the development version of the desktop app, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:run
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:run
-  ```
+## Deskripsi Proyek
+Aplikasi ini dikembangkan menggunakan **Kotlin Multiplatform** dan **Compose Multiplatform**. Fitur utama meliputi:
+- **Layouting:** Implementasi Column, Row, dan Box.
+- **Reusable Composables:** Header profil, Card biografi, dan Item info kontak yang modular.
+- **UI Interaction:** Tombol interaktif dengan animasi (AnimatedVisibility) untuk menampilkan informasi kontak.
+- **Styling:** Penggunaan Modifiers untuk shadow, clipping, dan responsive design.
 
----
-
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+## Cara Menjalankan
+### Android
+```shell
+.\gradlew.bat :composeApp:assembleDebug
+```
+### Desktop
+```shell
+.\gradlew.bat :composeApp:run
+```
