@@ -1,10 +1,6 @@
 package com.forkaton.pemob2_123140020
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -26,27 +22,65 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import org.jetbrains.compose.resources.painterResource
 
+// Import file dari struktur folder yang baru dibuat
+import com.forkaton.pemob2_123140020.data.ProfileUiState
+import com.forkaton.pemob2_123140020.ui.LabeledTextField
+import com.forkaton.pemob2_123140020.viewmodel.ProfileViewModel
+
 @Composable
-fun App() {
-    MaterialTheme {
-        MainScreen()
+fun App(viewModel: ProfileViewModel = viewModel()) {
+    // Collect state dari ViewModel sebagai Compose State [cite: 1038-1039]
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Menerapkan tema berdasarkan isDarkMode (Bonus +10%) [cite: 1243-1244]
+    MaterialTheme(
+        colorScheme = if (uiState.isDarkMode) darkColorScheme() else lightColorScheme()
+    ) {
+        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            MainScreen(
+                uiState = uiState,
+                onNameChange = { viewModel.updateName(it) },
+                onBioChange = { viewModel.updateBio(it) },
+                onToggleDark = { viewModel.toggleDarkMode(it) },
+                onToggleEdit = { viewModel.toggleEditMode() }
+            )
+        }
     }
 }
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    uiState: ProfileUiState,
+    onNameChange: (String) -> Unit,
+    onBioChange: (String) -> Unit,
+    onToggleDark: (Boolean) -> Unit,
+    onToggleEdit: () -> Unit
+) {
     var showContactInfo by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
     ) {
+        // Fitur Dark Mode Toggle
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Dark Mode", fontWeight = FontWeight.Medium)
+            Spacer(modifier = Modifier.width(8.dp))
+            Switch(checked = uiState.isDarkMode, onCheckedChange = onToggleDark)
+        }
+
         ProfileHeader(
-            name = "Anselmus Herpin Hasugian",
+            name = uiState.name,
             role = "Mahasiswa Teknik Informatika - ITERA"
         )
 
@@ -56,9 +90,39 @@ fun MainScreen() {
             modifier = Modifier.padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            ProfileCard(
-                bio = "Halo! Saya adalah mahasiswa Program Studi Teknik Informatika di Institut Teknologi Sumatera dengan NIM 123140020. Saya memiliki minat mendalam di bidang rekayasa perangkat lunak, khususnya pengembangan aplikasi mobile menggunakan Kotlin Multiplatform."
-            )
+            // Animasi Transisi Form Edit dan Tampilan Biodata
+            Crossfade(targetState = uiState.isEditing) { isEditing ->
+                if (isEditing) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Text(
+                                text = "Edit Profile",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            // Memanggil Stateless TextField [cite: 1118-1123]
+                            LabeledTextField(label = "Nama", value = uiState.name, onValueChange = onNameChange)
+                            LabeledTextField(label = "Bio", value = uiState.bio, onValueChange = onBioChange)
+                            Button(
+                                onClick = onToggleEdit,
+                                modifier = Modifier.align(Alignment.End)
+                            ) {
+                                Text("Simpan")
+                            }
+                        }
+                    }
+                } else {
+                    ProfileCard(bio = uiState.bio, onEditClick = onToggleEdit)
+                }
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -70,14 +134,12 @@ fun MainScreen() {
                 Text(if (showContactInfo) "Sembunyikan Kontak" else "Hubungi Saya")
             }
 
-            // Animasi Bonus 10%
             AnimatedVisibility(
                 visible = showContactInfo,
                 enter = slideInVertically() + fadeIn(),
                 exit = slideOutVertically() + fadeOut()
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    // Menggunakan ImageVector sesuai permintaan
                     InfoItem(icon = Icons.Default.Email, text = "anselmus.123140020@student.itera.ac.id")
                     InfoItem(icon = Icons.Default.Phone, text = "072170918455")
                     InfoItem(icon = Icons.Default.LocationOn, text = "Way Hui, Lampung")
@@ -141,7 +203,7 @@ fun ProfileHeader(name: String, role: String) {
 }
 
 @Composable
-fun ProfileCard(bio: String) {
+fun ProfileCard(bio: String, onEditClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -150,12 +212,21 @@ fun ProfileCard(bio: String) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(
-                text = "Biodata Saya",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Biodata Saya",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                TextButton(onClick = onEditClick) {
+                    Text("Edit")
+                }
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = bio,
@@ -168,7 +239,6 @@ fun ProfileCard(bio: String) {
     }
 }
 
-// Komponen direvisi untuk menerima ImageVector dan menggunakan Icon
 @Composable
 fun InfoItem(icon: ImageVector, text: String) {
     Row(
