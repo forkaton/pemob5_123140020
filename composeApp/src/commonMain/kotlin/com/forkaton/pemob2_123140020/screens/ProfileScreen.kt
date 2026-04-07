@@ -24,7 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
-// --- IMPORT RESOURCE YANG BENAR ---
+// --- IMPORT UNTUK ANIMASI SCROLL ---
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+
 import org.jetbrains.compose.resources.painterResource
 import com.forkaton.pemob2_123140020.Res
 import com.forkaton.pemob2_123140020.foto_ansel
@@ -38,10 +41,14 @@ fun ProfileScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showContactInfo by remember { mutableStateOf(false) }
 
+    // Menyimpan state scroll dan coroutine untuk auto-scroll
+    val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState) // Menggunakan scroll state yang sudah dideklarasikan
     ) {
         // Fitur Dark Mode Toggle
         Row(
@@ -103,7 +110,17 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = { showContactInfo = !showContactInfo },
+                onClick = {
+                    showContactInfo = !showContactInfo
+
+                    // Efek Auto-Scroll Pintar saat tombol ditekan
+                    if (showContactInfo) {
+                        coroutineScope.launch {
+                            delay(150) // Tunggu sebentar sampai animasi kotak info muncul
+                            scrollState.animateScrollTo(scrollState.maxValue) // Geser layar mentok ke bawah
+                        }
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium
             ) {
@@ -122,7 +139,8 @@ fun ProfileScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            // Memperbesar ukuran Spacer di paling bawah agar ada ruang lega untuk scroll
+            Spacer(modifier = Modifier.height(80.dp))
         }
     }
 }
@@ -154,7 +172,6 @@ fun ProfileHeader(name: String, role: String) {
                 color = MaterialTheme.colorScheme.surfaceVariant,
                 shadowElevation = 8.dp
             ) {
-                // PEMANGGILAN GAMBAR YANG BENAR
                 Image(
                     painter = painterResource(Res.drawable.foto_ansel),
                     contentDescription = "Foto Profil",

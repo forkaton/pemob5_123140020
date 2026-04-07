@@ -47,11 +47,9 @@ Selain mengadopsi latihan di atas, aplikasi ini juga telah menyelesaikan seluruh
 ## Dokumentasi Referensi
 
 ### 1. Tautan Video Demonstrasi
-*Harap cantumkan tautan YouTube atau Google Drive di sini.*
-- Tautan: [Masukkan URL Video]
+- Tautan: https://drive.google.com/drive/folders/1IvGbsYZUi5sMhBlatIVuKv1UScar7QC0?usp=sharing
 
 ### 2. Lampiran Antarmuka (Screenshots)
-*(Unggah file gambar ke dalam repositori atau lakukan drop and drag langsung melalui editor Markdown GitHub agar menghasilkan tautan yang valid).*
 
 - **Tampilan Daftar Catatan Utama**
   ![img.png](img.png)
