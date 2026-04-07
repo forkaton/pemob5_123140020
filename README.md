@@ -1,44 +1,70 @@
-# Tugas Praktikum 4 - My Profile App (State Management & MVVM)
+# Tugas Praktikum 5 - Multi-Screen Navigation App
 
 **Nama:** Anselmus Herpin Hasugian  
 **NIM:** 123140020
 
 ## Deskripsi Proyek
-Proyek ini merupakan pengembangan lanjutan dari aplikasi "My Profile App" dengan mengimplementasikan arsitektur **MVVM (Model-View-ViewModel)** dan manajemen *State* yang reaktif. Aplikasi ini dibangun menggunakan Kotlin Multiplatform dan Jetpack Compose, berfokus pada pemisahan logika bisnis dari tampilan antarmuka (*UI Layer*).
+Proyek ini merupakan implementasi arsitektur Navigation Component pada Kotlin Multiplatform (KMP). Aplikasi ini dikembangkan untuk mendemonstrasikan kapabilitas perpindahan antar layar (routing), mekanisme pengiriman data statis antar layar (arguments), serta penggunaan Bottom Navigation yang dipadukan dengan pemisahan lapisan logika menggunakan pola MVVM (Model-View-ViewModel).
 
-## Pemenuhan Kriteria Rubrik Penilaian
-Aplikasi ini telah memenuhi seluruh spesifikasi tugas yang diinstruksikan:
+---
 
-1. **ViewModel Implementation (25%)**
-    * Menggunakan `ProfileViewModel` yang mewarisi `androidx.lifecycle.ViewModel` untuk mempertahankan data saat terjadi perubahan konfigurasi.
-    * Menggunakan `MutableStateFlow` dan mengeksposnya sebagai `StateFlow` *read-only* ke UI.
-2. **UI State Pattern (20%)**
-    * Menggunakan *Data class* `ProfileUiState` untuk merangkum seluruh status layar secara terpusat (nama, bio, mode edit, dan mode gelap).
-3. **State Hoisting (20%)**
-    * Pemisahan komponen `LabeledTextField` menjadi fungsi yang sepenuhnya *stateless*. Fungsi ini hanya menerima nilai dan *callback* (`onValueChange`) dari *parent*, tanpa menyimpan *state* internal.
-4. **Edit Feature (20%)**
-    * Implementasi form fungsional yang memungkinkan pengguna mengubah nama dan bio.
-    * Terintegrasi dengan tombol "Simpan" yang memicu pembaruan status langsung ke ViewModel, dilengkapi dengan transisi animasi layar (`Crossfade`).
-5. **Code Structure (15%)**
-    * Kode telah distrukturisasi dengan prinsip *Clean Code* ke dalam *package* yang terpisah sesuai fungsinya:
-        * `data/` (Penyimpanan model UI State)
-        * `viewmodel/` (Pengelola logika bisnis)
-        * `ui/` (Komponen visual *reusable*)
-6. **Bonus (+10%) - Smooth Dark Mode Theme**
-    * Implementasi sakelar (*Switch*) *Dark Mode* yang *state*-nya dikendalikan dari ViewModel.
-    * Pergantian tema yang mulus (*smooth*) berkat adaptasi dinamis menggunakan `MaterialTheme(colorScheme)`.
+## Pemenuhan Kriteria Latihan Modul
+Pendekatan pengembangan aplikasi ini secara langsung mengintegrasikan Latihan 1, 2, dan 3 menjadi satu kesatuan arsitektur (Single Activity, Multiple Screens). Berikut adalah rincian pemenuhan *checklist* dari modul pada struktur kode yang telah diunggah:
 
-## Dokumentasi Visual
+### Latihan 1: Navigasi Dasar
+[cite_start]Seluruh kriteria Latihan 1 telah terpenuhi secara fungsional [cite: 389-395]:
+- [x] **Setup NavController & NavHost:** Diimplementasikan pada file `MainScreen.kt` menggunakan fungsi `rememberNavController()` sebagai sentral pengatur rute.
+- [x] **HomeScreen dengan Button & navigate() ke detail:** Diterapkan melalui komponen antarmuka `NoteListScreen` yang menggunakan fungsi *callback* navigasi untuk memicu metode `.navigate()`.
+- [x] **DetailScreen dengan Button & popBackStack() ke home:** Diterapkan melalui `TopAppBar` pada `NoteDetailScreen` dan `AddNoteScreen` di mana fungsi `popBackStack()` dipanggil secara aman.
 
-**1. Profile View (Default)** ![Profile View](screenshots/profile.png)
+### Latihan 2: Navigasi dengan Argument
+[cite_start]Seluruh kriteria Latihan 2 telah dirangkai pada alur kerja detail catatan [cite: 409-419]:
+- [x] **Sealed class untuk routes:** Diimplementasikan secara terpusat pada file `navigation/Routes.kt` (Kelas `Screen`).
+- [x] **Route dengan {noteId} & navArgument setup:** Dikonfigurasi di dalam `NavHost` pada file `MainScreen.kt` dengan mendeklarasikan argumen melalui fungsi `navArgument("noteId")` bertipe `NavType.IntType`.
+- [x] **NoteListScreen dengan clickable list items:** Diimplementasikan menggunakan `Modifier.clickable` pada `ElevatedCard` yang membungkus setiap item catatan.
+- [x] **navigate dengan noteId & NoteDetailScreen menampilkan noteId:** Berhasil mengekstraksi parameter menggunakan instruksi `backStackEntry.arguments?.getInt("noteId")` yang kemudian diteruskan sebagai *state* statis ke antarmuka pembaca.
 
-**2. Edit Form** ![Edit Form](screenshots/edit.png)
+### Latihan 3: Bottom Navigation
+[cite_start]Seluruh kriteria Latihan 3 telah diintegrasikan pada kerangka utama aplikasi [cite: 447-451]:
+- [x] **BottomNavItem sealed class:** Dideklarasikan dalam `navigation/Routes.kt`.
+- [x] **NavigationBar & NavigationBarItem:** Diabstraksi dalam komponen modular `AppBottomNavigationBar.kt` agar struktur kode tetap bersih.
+- [x] **currentBackStackEntry untuk selected state:** Menggunakan observasi *state back stack entry* untuk menyoroti tab aktif secara presisi.
+- [x] **Scaffold dengan bottomBar & NavHost di content:** Logika `Scaffold` dideklarasikan pada `MainScreen.kt`, dilengkapi dengan fungsi penyembunyian bar bawah (*Auto-Hide*) secara dinamis.
+- [x] **3 screen composables & Test tab switching:** Mencakup integrasi layar Notes, Favorites, dan Profile yang telah dipisahkan ke dalam folder `screens`.
 
-**3. Dark Mode** ![Dark Mode](screenshots/dark.png)
+---
 
-*(Catatan: Gambar di atas mewakili state UI yang dikendalikan penuh oleh ViewModel).*
+## Pemenuhan Syarat Tugas Praktikum Utama
+Selain mengadopsi latihan di atas, aplikasi ini juga telah menyelesaikan seluruh spesifikasi akhir tugas:
+1. Tersedianya Bottom Navigation dengan 3 tab (Notes, Favorites, Profile) yang stabil.
+2. Keberhasilan alur Note List menuju Note Detail yang disertai ekstraksi *Required Arguments*.
+3. Penempatan Floating Action Button (FAB) pada halaman utama untuk mengakses layar penambahan entri baru.
+4. Perilaku *Back Navigation* yang aman dari segala kemungkinan memori *stack* yang tumpang tindih.
+5. Tersedianya fitur Edit Note yang kembali mengutilisasi fungsi argument *noteId* untuk penyesuaian *state* melalui ViewModel.
 
-## Cara Menjalankan Aplikasi
-**Menjalankan di Emulator/Perangkat Android:**
-```shell
-.\gradlew.bat :composeApp:assembleDebug
+---
+
+## Dokumentasi Referensi
+
+### 1. Tautan Video Demonstrasi
+*Harap cantumkan tautan YouTube atau Google Drive di sini.*
+- Tautan: [Masukkan URL Video]
+
+### 2. Lampiran Antarmuka (Screenshots)
+*(Unggah file gambar ke dalam repositori atau lakukan drop and drag langsung melalui editor Markdown GitHub agar menghasilkan tautan yang valid).*
+
+- **Tampilan Daftar Catatan Utama**
+  ![img.png](img.png)
+
+- **Tampilan Form Tambah & Edit Catatan**
+  ![img_2.png](img_2.png)
+  ![img_4.png](img_4.png)
+
+- **Tampilan Pembaca Detail Catatan**
+  ![img_3.png](img_3.png)
+
+- **Tampilan Halaman Favorit**
+  ![img_5.png](img_5.png)
+
+- **Tampilan Profil Terintegrasi (Lanjutan Modul 4)**
+  ![img_6.png](img_6.png)
