@@ -37,6 +37,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+            // Navigation untuk Compose Multiplatform
+            implementation("org.jetbrains.androidx.navigation:navigation-compose:2.7.0-alpha07")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
